@@ -12,6 +12,7 @@
 import Todos from './components/Todos';
 import AddTodo from './components/AddTodo';
 import Header from './components/layouts/Header'
+import axios from 'axios';
 
 export default {
   name: 'app',
@@ -22,33 +23,36 @@ export default {
   },
   data() {
     return {
-      todos: [
-        {
-          id: 1,
-          title: "Complete the Todo App",
-          completed: false
-        },
-        {
-          id: 2,
-          title: "Complete the vue-super-form",
-          completed: false
-        },
-        {
-          id: 3,
-          title: "Do washing",
-          completed: true
-        }
-      ]
+      todos: []
     }
   },
   methods: {
     deleteAnItem(id) {
-      const result = this.todos.filter(todo => todo.id != id);
+      axios.delete(`https://jsonplaceholder.typicode.com/todos/${id}`)
+        .then(response => {
+          const result = this.todos.filter(todo => todo.id != id);      
+          this.todos = result;
+        })
     },
-    AddNewTodo(newTodo) {      
-      this.todos = [...this.todos, newTodo];
+    AddNewTodo(newTodo) {
+      const newValue = {
+        title: newTodo.title,
+        completed: newTodo.completed
+      }
+      axios.post('https://jsonplaceholder.typicode.com/todos?_limit=5', newValue)
+        .then(response => 
+          this.todos = [...this.todos, newValue])
+        .catch(err => 
+          console.warn('error', err))
+    },
+  },
+  created() {
+      axios.get('https://jsonplaceholder.typicode.com/todos?_limit=5')
+        .then(response => 
+          this.todos = response.data)
+        .catch(err => {
+          console.warn('error', err)})
     }
-  }
 }
 </script>
 
